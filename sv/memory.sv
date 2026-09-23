@@ -31,8 +31,8 @@ module memory #(
   //los dos puertos disponen de we
   //permite lectura y escritura (rdata y wdata)
 
-  //instrucciones
   always_ff @(posedge clk) begin
+    //instrucciones
     if (we_a) begin
       //no suele usarse be en instrucciones normalmente, siempre escribes
       //la instr completa
@@ -48,16 +48,18 @@ module memory #(
       end
       rdata_a <= mem[addr_a];
     end
-  end
+
 
   //datos
-  always_ff @(posedge clk) begin
     if (we_b) begin
       for (int i = 0; i < NUM_BYTES; i++) begin
-        if (be_b[i]) mem[addr_b][i*8+:8] <= wdata_b[i*8+:8];
+        if (be_b[i]) begin
+          mem[addr_b][i*8+:8] <= wdata_b[i*8+:8];
+        end
       end
     end
     rdata_b <= mem[addr_b];
+
   end
 
 endmodule
