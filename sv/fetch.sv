@@ -1,5 +1,4 @@
 module fetch #(
-    parameter int     NUM_BYTES  = 4,
     parameter int     NUM_BITS  = 32,
     parameter int     ADDR_WIDTH = 17
 )(
@@ -8,16 +7,15 @@ module fetch #(
     output  logic [ADDR_WIDTH-1 : 0] addr_a
 );
 
-  //PC va sumando +4 pero va a llegar hasta 16 imagino
-  //0, 4, 8, 16
+  //PC va sumando +4 siempre cada ciclo de reloj
   //como con 3 bits llegamos hasta 15 pues ponemos 4
   logic [NUM_BITS-1 : 0] pc;
 
     always_ff @(posedge clk) begin
         if (!rst_n)
-            pc <= 32'd0;
+            pc <= '0;
         else
-            pc <= pc + 32'd4;
+            pc <= pc + 4;
     end 
 
     //los 2 bits usados para pedir el byte {0, 1, 2, 3} se descartan
