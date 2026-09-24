@@ -1,7 +1,9 @@
 module memory #(
-    parameter int MEM_WIDTH  = 32,
-    parameter int NUM_BYTES  = 4,
-    parameter int ADDR_WIDTH = 17
+    parameter int     MEM_WIDTH  = 32,
+    parameter int     NUM_BYTES  = 4,
+    parameter int     ADDR_WIDTH = 17,
+    //idealmente el hex file se pasa en el tb
+    parameter string  INIT_FILE = "" 
 ) (
     input logic clk,
 
@@ -24,6 +26,13 @@ module memory #(
   //mem width-1; se escribe así porque el tamaño es unpacked pero el
   //tamaño de cada elemento es packed
   logic [MEM_WIDTH-1 : 0] mem[0 : (2**(ADDR_WIDTH) -1)];
+
+  //precarga con fichero (opcional)
+  initial begin
+    if (INIT_FILE != "") begin
+      $readmemh(INIT_FILE, mem);
+    end
+  end
 
 
   //cosas que tiene que tener:
