@@ -21,21 +21,36 @@ module core #(
     output logic [NUM_BYTES-1:0]     be_b
 );
 
+    // Señal intermedia para conectar la dirección de la instrucción en ejecución
+    logic [MEM_WIDTH-1:0] pc_ir;
+
+    // Etapa de Fetch
     fetch #(
         .NUM_BITS   (MEM_WIDTH),
         .ADDR_WIDTH (ADDR_WIDTH)
     ) fetch_inst (
         .clk    (clk),
         .rst_n  (rst_n),
-        .addr_a (addr_a)
+        .addr_a (addr_a),
+        .pc_ir  (pc_ir)
     );
 
-    // puerto A: nada escribe instrucciones todavía
+    // Etapa de Decode y Execute
+    decoder #(
+        .NUM_BITS (MEM_WIDTH)
+    ) decoder_inst (
+        .clk   (clk),
+        .rst   (~rst_n),
+        .instr (rdata_a),
+        .pc_ir (pc_ir)
+    );
+
+    // puerto A: lectura de instrucciones (no escribe)
     assign wdata_a = '0;
     assign we_a    = 1'b0;
     assign be_a    = '0;
 
-    // puerto B: sin uso hasta el "DecExe"
+    // puerto B: acceso a datos (sin uso por ahora hasta cablear la carga/almacenamiento en DecExe)
     assign addr_b  = '0;
     assign wdata_b = '0;
     assign we_b    = 1'b0;

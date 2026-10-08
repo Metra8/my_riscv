@@ -4,7 +4,9 @@ module fetch #(
 )(
     input   logic   clk,
     input   logic rst_n,
-    output  logic [ADDR_WIDTH-1 : 0] addr_a
+    output  logic [ADDR_WIDTH-1 : 0] addr_a,
+    //current pc
+    output  logic [NUM_BITS-1:0]     pc_ir
 );
 
   //PC va sumando +4 siempre cada ciclo de reloj
@@ -12,10 +14,13 @@ module fetch #(
   logic [NUM_BITS-1 : 0] pc;
 
     always_ff @(posedge clk) begin
-        if (!rst_n)
+        if (!rst_n) begin
             pc <= '0;
-        else
+            pc_ir <= '0;
+        end else begin
             pc <= pc + 4;
+            pc_ir  <= pc;
+        end
     end 
 
     //los 2 bits usados para pedir el byte {0, 1, 2, 3} se descartan
