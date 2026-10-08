@@ -25,7 +25,7 @@ module fetch #(
 
     //los 2 bits usados para pedir el byte {0, 1, 2, 3} se descartan
     //de ahí el :2
-    // **esto de aquí es combinacional**, por qué no ponemos un always_comb??
+    // **esto de aquí es combinacional**
     assign addr_a = pc[ADDR_WIDTH+1:2];
     //[18 :2] -> 17 bits = ancho de addr_width
 
