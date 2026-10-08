@@ -1,6 +1,6 @@
 //Bus generico a memoria
 
-interface membus #(
+interface memory_if #(
 
     	parameter int     MEM_WIDTH  = 32,
     	parameter int     NUM_BYTES  = 4,
@@ -17,4 +17,4 @@ interface membus #(
 
 );
 
-endinterface: membus
+endinterface: memory_if
