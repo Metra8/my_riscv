@@ -1,6 +1,6 @@
 module regfile #(
     parameter int     NUM_BITS  = 32,
-    parameter int NUM_REGS  = 32
+    parameter int     NUM_REGS  = 32
 )(
     input   logic                     clk,
     input   logic                     rst,
@@ -39,8 +39,9 @@ module regfile #(
                 register[i] <= '0;
             end
         end else begin
-            if (we_alu) register[waddr_alu] <= wdata_alu;
-            if (we_mem) register[waddr_mem] <= wdata_mem;
+           // Solo se permite la escritura si la dirección NO es el registro 0
+            if (we_alu && (waddr_alu != '0)) register[waddr_alu] <= wdata_alu;
+            if (we_mem && (waddr_mem != '0)) register[waddr_mem] <= wdata_mem;
         end
     end
 
