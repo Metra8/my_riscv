@@ -37,7 +37,4 @@ module fetch #(
     // se descartan los dos bits menos significativos
     // los bits restantes (17 en este caso) forman addr_a
     // addr_a es el índice de palabra que se envía al puerto A de la memoria
-
-
-
 endmodule
