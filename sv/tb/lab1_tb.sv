@@ -10,7 +10,7 @@ module fetch_tb #(
 );
 
 
-	//definicion de señales de interconexion
+	//definicion de seï¿½ales de interconexion
 
 	logic clk;
 	logic reset;
@@ -50,7 +50,7 @@ module fetch_tb #(
 	);
 
 
-	//generacion de señal de reloj
+	//generacion de seï¿½al de reloj
 	//conmuta clk cada 5 ns, fclk = 100 MHz
 
 	always #5 clk = ~clk;
