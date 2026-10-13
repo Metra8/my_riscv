@@ -56,8 +56,8 @@ module memory #(
           // mem[addr_a][7:0]; mem[addr_a][15:8];
         end
       end
-      rdata_a <= mem[addr_a];
     end
+  rdata_a <= mem[addr_a];
 
   // datos
     if (we_b) begin
