@@ -1,4 +1,4 @@
-package decoder_pkg;
+package riscv_pkg;
 
     // ---- opcodes RV32I ----
     typedef enum logic [6:0] {
