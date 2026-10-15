@@ -1,101 +1,67 @@
-
 import riscv_pkg::*;
 
-module alu #(
-
+module alu
+#(
     parameter int NUM_BITS = 32
-
 )(
 
-	input logic [NUM_BITS : 0] 	op1,
-	input logic [NUM_BITS : 0] 	op2,
+	input logic [NUM_BITS-1:0] 	op1,
+	input logic [NUM_BITS-1:0] 	op2,
 	input alu_op_t				aluop,
 	input logic					Cin,	//Carry In
 
-	output logic [NUM_BITS : 0]	res,
+	output logic [NUM_BITS-1:0]	result,
 	output logic 				eq,		//resultado es 0
 	output logic				lt,		//resultado es < 0 (complemento a 2)
 	output logic				ltu,	//resultado es < 0 (operandos sin signo)
 	output logic				Cout,
 	output logic				Ov		//Overflow
-
 );
 
-	logic signed [NUM_BITS+1 : 0]	result;
-	logic 							CarryOut;
+// Operaciones con un bit extra (NUM_BITS + 1)
+    logic [NUM_BITS:0] ext_op1_u, ext_op2_u, res_sub_u; // Sin signo
+    logic [NUM_BITS:0] ext_op1_s, ext_op2_s, res_sub_s; // Con signo (complemento a 2)
 
+    // Extensión sin signo (añadiendo un 0 a la izquierda)
+    assign ext_op1_u = {1'b0, op1};
+    assign ext_op2_u = {1'b0, op2};
+    assign res_sub_u = ext_op1_u - ext_op2_u;
 
-	always_comb
-	begin
+    // Extensión con signo (repitiendo el bit más significativo / bit de signo)
+    assign ext_op1_s = {op1[NUM_BITS-1], op1};
+    assign ext_op2_s = {op2[NUM_BITS-1], op2};
+    assign res_sub_s = ext_op1_s - ext_op2_s;
 
-		unique case(aluop)
-		
-		ALU_ADD: begin
-			
-			result = op1 + op2;
+    // Cálculo de las señales de salto / comparación
+    assign eq  = (result == '0);
+    assign ltu = res_sub_u[NUM_BITS]; // El bit extra indica si hubo préstamo (borrow)
+    assign lt  = res_sub_s[NUM_BITS]; // El bit extra indica el signo del resultado extendido
 
-		end
-		
-		ALU_SUB: begin
+	//En esencia, un 1 en el bit extra de res_sub_s indica que op1 < op2 en complemento a 2, mientras que un 1 en el bit extra de res_sub_u indica que op1 < op2 sin signo.
 
-			result = op1 - op2;
+always_comb begin
+    unique case(aluop) //usamos unique porque estamos seguros de que aluop no puede tomar otros valores
 
-		end
+        ALU_ADD: result = op1 + op2;
 
-		ALU_SLL: begin
+        ALU_SUB: result = op1 - op2;
 
-			result = op1 << op2;
+        ALU_SLL: result = op1 << op2[4:0];   //shift logical - RISCV especifica que el max shift es 31 por lo que solo tomamos 5 bits
 
-		end
+        ALU_SRL: result = op1 >> op2[4:0];   //shift logical - RISCV especifica que el max shift es 31 por lo que solo tomamos 5 bits
 
-		ALU_SRL: begin
+        ALU_SLT: result = { {NUM_BITS-1{1'b0}}, lt }; //complemento a dos
 
-			result = op1 >> op2;
+        ALU_SLTU: result = { {NUM_BITS-1{1'b0}}, ltu }; //unsigned
 
-		end
+        ALU_XOR: result = op1 ^ op2;
 
-		ALU_SRA: begin
+        ALU_SRA: result = $signed(op1) >>> op2[4:0];   //shift aritmético con el operando >>> - primero convertimos el operando a signed para preservar el signo.
+        ALU_OR: result = op1 | op2;
 
-			result = op1 >>> op2;
+        ALU_AND: result = op1 & op2;
 
-		end
-
-		ALU_SLT: begin
-
-			result = (op1 < 2)?1:0;
-
-		end
-
-		ALU_SLTU: begin
-
-			result = (op1 < 2)?1:0;
-
-		end
-
-		ALU_OR: begin
-
-			result = op1 | op2;
-
-		end
-
-		ALU_AND: begin
-
-			result = op1 & op2;
-
-		end
-
-		ALU_XOR: begin
-
-			result = op1 ^ op2;
-
-		end
-
-		endcase
-
-		assign res = result;
-
-
-	end
-
-
+		default: result = '0; // Valor por defecto para evitar latches
+	endcase
+end
 endmodule
