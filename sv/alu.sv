@@ -9,14 +9,20 @@ module alu #(
 
 	input logic [NUM_BITS : 0] 	op1,
 	input logic [NUM_BITS : 0] 	op2,
-	input alu_op_t			aluop,
+	input alu_op_t				aluop,
+	input logic					Cin,	//Carry In
 
-	output logic [NUM_BITS : 0]	result,
-	output logic 			eq,	//resultado es 0
-	output logic			lt,	//resultado es < 0 (complemento a 2)
-	output logic			ltu	//resultado es < 0 (operandos sin signo)
+	output logic [NUM_BITS : 0]	res,
+	output logic 				eq,		//resultado es 0
+	output logic				lt,		//resultado es < 0 (complemento a 2)
+	output logic				ltu,	//resultado es < 0 (operandos sin signo)
+	output logic				Cout,
+	output logic				Ov		//Overflow
 
 );
+
+	logic signed [NUM_BITS+1 : 0]	result;
+	logic 							CarryOut;
 
 
 	always_comb
@@ -65,7 +71,29 @@ module alu #(
 			result = (op1 < 2)?1:0;
 
 		end
+
+		ALU_OR: begin
+
+			result = op1 | op2;
+
+		end
+
+		ALU_AND: begin
+
+			result = op1 & op2;
+
+		end
+
+		ALU_XOR: begin
+
+			result = op1 ^ op2;
+
+		end
+
 		endcase
+
+		assign res = result;
+
 
 	end
 
