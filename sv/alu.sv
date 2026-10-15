@@ -1,5 +1,5 @@
 
-import decoder_pkg::*;
+import riscv_pkg::*;
 
 module alu #(
 
