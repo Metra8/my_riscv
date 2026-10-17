@@ -4,3 +4,12 @@ transcript
 *.wlf
 *.log
 *.f
+
+# Verilator y simuladores
+obj_dir/
+sim_processor
+*.o
+*.a
+*.exe
+*.d
+*.asi
