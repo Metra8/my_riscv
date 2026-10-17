@@ -2,34 +2,34 @@ module decoder
     import riscv_pkg::*;
 #(
     parameter int NUM_BITS = 32
-)(
-    input  logic                  clk,
-    input  logic                  rst,
+) (
+    input logic clk,
+    input logic rst,
 
-    input  logic [NUM_BITS-1:0]   instr,   // IR: rdata_a
-    input  logic [NUM_BITS-1:0]   pc_ir,   // output pc
+    input logic [NUM_BITS-1:0] instr,  // IR: rdata_a
+    input logic [NUM_BITS-1:0] pc_ir,  // output pc
 
-    output logic [NUM_BITS-1:0]   op1,
-    output logic [NUM_BITS-1:0]   op2,
-    output alu_op_t               aluop,
+    output logic    [NUM_BITS-1:0] op1,
+    output logic    [NUM_BITS-1:0] op2,
+    output alu_op_t                aluop,
 
-    output logic                  reg_write,
-    output logic                  mem_read,
-    output logic                  mem_write,
-    output logic                  is_branch,
-    output logic                  is_jump,
-    output logic                  illegal_instr,
+    output logic reg_write,
+    output logic mem_read,
+    output logic mem_write,
+    output logic is_branch,
+    output logic is_jump,
+    output logic illegal_instr,
 
-    output logic [2:0]            funct3,
-    output logic [4:0]            rd
+    output logic [2:0] funct3,
+    output logic [4:0] rd
 );
 
     // extracción de campos fijos
-    opcode_t    opcode;
+    opcode_t opcode;
     logic [4:0] rs1_addr, rs2_addr;
     logic [6:0] funct7;
     // simplificar funct7
-    logic       alt;        // funct7 == 0100000 (SUB, SRA, SRAI)
+    logic       alt;  // funct7 == 0100000 (SUB, SRA, SRAI)
 
     // seguir formato de instrucciones para reg
     assign opcode   = opcode_t'(instr[6:0]);
@@ -66,21 +66,21 @@ module decoder
     logic [NUM_BITS-1:0] rdata1, rdata2;
 
     regfile #(
-        .NUM_BITS (NUM_BITS)
+        .NUM_BITS(NUM_BITS)
     ) regfile_inst (
-        .clk        (clk),
-        .rst        (rst),
-        .rs1        (rs1_addr),
-        .rs2        (rs2_addr),
-        .rd1        (rdata1),
-        .rd2        (rdata2),
+        .clk      (clk),
+        .rst      (rst),
+        .rs1      (rs1_addr),
+        .rs2      (rs2_addr),
+        .rd1      (rdata1),
+        .rd2      (rdata2),
         // TODO (P3): conectar al resultado real de la ALU / dato de load
-        .we_alu     (1'b0),
-        .waddr_alu  (rd),
-        .wdata_alu  ('0),
-        .we_mem     (1'b0),
-        .waddr_mem  (rd),
-        .wdata_mem  ('0)
+        .we_alu   (1'b0),
+        .waddr_alu(rd),
+        .wdata_alu('0),
+        .we_mem   (1'b0),
+        .waddr_mem(rd),
+        .wdata_mem('0)
     );
 
     // ---- ALU ----
@@ -95,7 +95,7 @@ module decoder
 
         case (opcode)
             OP_RTYPE, OP_BRANCH: op2 = rdata2;
-            OP_JAL, OP_JALR:     op2 = 32'd4;   // dirección de retorno = pc_ir + 4
+            OP_JAL, OP_JALR:     op2 = 32'd4;  // dirección de retorno = pc_ir + 4
             default:             op2 = imm;
         endcase
     end
@@ -103,13 +103,13 @@ module decoder
     // código de operación de la ALU: { funct7 == 0100000, funct3 }
     always_comb begin
         case (opcode)
-            OP_RTYPE:  aluop = alu_op_t'({alt, funct3});
+            OP_RTYPE: aluop = alu_op_t'({alt, funct3});
             // en tipo I el bit "alt" solo cuenta en los shifts a la derecha;
             // en el resto forma parte del inmediato (addi no puede volverse sub)
-            OP_ITYPE:  aluop = (funct3 == 3'b101) ? alu_op_t'({alt, funct3})
-                                                  : alu_op_t'({1'b0, funct3});
-            OP_BRANCH: aluop = ALU_SUB;   // eq/lt/ltu salen de la resta (Práctica 3)
-            default:   aluop = ALU_ADD;   // load, store, jal, jalr, lui, auipc
+            OP_ITYPE:
+            aluop = (funct3 == 3'b101) ? alu_op_t'({alt, funct3}) : alu_op_t'({1'b0, funct3});
+            OP_BRANCH: aluop = ALU_SUB;  // eq/lt/ltu salen de la resta (Práctica 3)
+            default: aluop = ALU_ADD;  // load, store, jal, jalr, lui, auipc
         endcase
     end
 
@@ -130,33 +130,32 @@ module decoder
                 // ADD/SLL/SLT/SLTU/XOR/SRL/OR/AND con funct7=0000000,
                 // SUB/SRA con funct7=0100000. Cualquier otro funct7 es ilegal
                 // (incluido 0000001: RV32M, se añadirá en la Práctica 5)
-                legal = (funct7 == F7_BASE) ||
-                        (alt && (funct3 == 3'b000 || funct3 == 3'b101));
+                legal = (funct7 == F7_BASE) || (alt && (funct3 == 3'b000 || funct3 == 3'b101));
             end
 
             OP_ITYPE: begin
                 reg_write = 1'b1;
                 case (funct3)
-                    3'b001:  legal = (funct7 == F7_BASE);            // SLLI
-                    3'b101:  legal = (funct7 == F7_BASE) || alt;     // SRLI / SRAI
-                    default: legal = 1'b1;                           // addi, slti, sltiu, xori, ori, andi
+                    3'b001:  legal = (funct7 == F7_BASE);  // SLLI
+                    3'b101:  legal = (funct7 == F7_BASE) || alt;  // SRLI / SRAI
+                    default: legal = 1'b1;  // addi, slti, sltiu, xori, ori, andi
                 endcase
             end
 
             OP_LOAD: begin
                 reg_write = 1'b1;
-                mem_read  = 1'b1;
+                mem_read = 1'b1;
                 legal     = (funct3 inside {3'b000, 3'b001, 3'b010, 3'b100, 3'b101}); // lb lh lw lbu lhu
             end
 
             OP_STORE: begin
                 mem_write = 1'b1;
-                legal     = (funct3 inside {3'b000, 3'b001, 3'b010});                  // sb sh sw
+                legal     = (funct3 inside {3'b000, 3'b001, 3'b010});  // sb sh sw
             end
 
             OP_BRANCH: begin
                 is_branch = 1'b1;
-                legal     = !(funct3 inside {3'b010, 3'b011});                         // beq bne blt bge bltu bgeu
+                legal     = !(funct3 inside {3'b010, 3'b011});  // beq bne blt bge bltu bgeu
             end
 
             OP_JAL: begin
@@ -173,12 +172,12 @@ module decoder
             OP_LUI, OP_AUIPC: reg_write = 1'b1;
 
             // FENCE: legal, sin efecto en este diseño
-            OP_FENCE:  legal = (funct3 == 3'b000);
+            OP_FENCE: legal = (funct3 == 3'b000);
 
             // ECALL / EBREAK: legales pero sin efecto
             OP_SYSTEM: legal = (instr[31:21] == 11'b0) && (instr[19:7] == 13'b0);
 
-            default:   legal = 1'b0;
+            default: legal = 1'b0;
         endcase
 
         illegal_instr = !legal;
