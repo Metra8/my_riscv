@@ -12,9 +12,9 @@ module fetch #(
 
     output logic [ADDR_WIDTH-1 : 0] addr_a,
     // PC de la instrucción que hay ahora mismo en el IR (rdata_a)
-    output logic [  NUM_BITS-1 : 0] pc_ir,
+    output logic [NUM_BITS-1 : 0]   pc_ir,
     // 1 = la instrucción del IR es válida; 0 = anulada (hueco de salto / arranque)
-    output logic                    ir_valid
+    output logic ir_valid
 );
 
     logic [NUM_BITS-1 : 0] pc, pc_ir_r, pc_next;
