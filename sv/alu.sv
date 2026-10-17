@@ -23,7 +23,7 @@ module alu
     assign ltu    = diff_u[NUM_BITS];
 
     always_comb begin
-        case (aluop)
+        unique case (aluop)
             ALU_ADD:  result = op1 + op2;
             ALU_SUB:  result = op1 - op2;
             ALU_SLL:  result = op1 << op2[4:0];
