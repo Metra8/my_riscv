@@ -1,12 +1,10 @@
-import riscv_pkg::*;
-
 module decoder
-
+    import riscv_pkg::*;
 #(
     parameter int NUM_BITS = 32
 ) (
     input logic clk,
-    input logic rst,
+    input logic rst_n,
 
     input logic [NUM_BITS-1:0] instr,  // IR: rdata_a
     input logic [NUM_BITS-1:0] pc_ir,  // output pc
@@ -71,7 +69,7 @@ module decoder
         .NUM_BITS(NUM_BITS)
     ) regfile_inst (
         .clk      (clk),
-        .rst      (rst),
+        .rst_n    (rst_n),
         .rs1      (rs1_addr),
         .rs2      (rs2_addr),
         .rd1      (rdata1),
@@ -97,7 +95,7 @@ module decoder
 
         case (opcode)
             OP_RTYPE, OP_BRANCH: op2 = rdata2;
-            OP_JAL, OP_JALR:     op2 = 32'd4;  // dirección de retorno = pc_ir + 4
+            OP_JAL, OP_JALR:     op2 = NUM_BITS'(4);  // dirección de retorno = pc_ir + 4
             default:             op2 = imm;
         endcase
     end

@@ -12,15 +12,9 @@ module alu
     output logic                   ltu      // op1 <  op2 unsigned (bltu/bgeu)
 );
 
-    // restas con un bit extra: el bit más alto da el signo / el acarreo
-    logic [NUM_BITS:0] diff_s, diff_u;
-
-    assign diff_u = {1'b0, op1} - {1'b0, op2};
-    assign diff_s = {op1[NUM_BITS-1], op1} - {op2[NUM_BITS-1], op2};
-
-    assign eq     = (diff_u[NUM_BITS-1:0] == '0);
-    assign lt     = diff_s[NUM_BITS];
-    assign ltu    = diff_u[NUM_BITS];
+    assign eq  = (op1 == op2);
+    assign lt  = ($signed(op1) < $signed(op2));
+    assign ltu = (op1 < op2);
 
     always_comb begin
         unique case (aluop)

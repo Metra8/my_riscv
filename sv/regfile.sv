@@ -3,7 +3,7 @@ module regfile #(
     parameter int NUM_REGS = 32
 ) (
     input logic clk,
-    input logic rst,
+    input logic rst_n,
     //reg source
     input logic [4:0] rs1,
     input logic [4:0] rs2,
@@ -28,27 +28,27 @@ module regfile #(
 
 );
 
-  //registro de [32][32]
-  logic [NUM_BITS-1 : 0] register[NUM_REGS-1 : 0];
+    //registro de [32][32]
+    logic [NUM_BITS-1 : 0] register[NUM_REGS-1 : 0];
 
-  //escritura síncrona (memoria persistente)-
-  always_ff @(posedge clk) begin
-    if (rst) begin
-      //técnicamente aquí no hace falta begin/end
-      for (int i = 0; i < NUM_REGS; i++) begin
-        register[i] <= '0;
-      end
-    end else begin
-      // Solo se permite la escritura si la dirección NO es el registro 0
-      if (we_mem && (waddr_mem != '0)) register[waddr_mem] <= wdata_mem;
-      if (we_alu && (waddr_alu != '0)) register[waddr_alu] <= wdata_alu;
+    //escritura síncrona (memoria persistente)-
+    always_ff @(posedge clk) begin
+        if (!rst_n) begin
+            //técnicamente aquí no hace falta begin/end
+            for (int i = 0; i < NUM_REGS; i++) begin
+                register[i] <= '0;
+            end
+        end else begin
+            // Solo se permite la escritura si la dirección NO es el registro 0
+            if (we_mem && (waddr_mem != '0)) register[waddr_mem] <= wdata_mem;
+            if (we_alu && (waddr_alu != '0)) register[waddr_alu] <= wdata_alu;
+        end
     end
-  end
 
-  //lectura combinacional (sin reloj)
-  //para asignaciones simples no hace falta always_comb
-  //si nos piden el registro '0' damos x0 (siempre '0's)
-  assign rd1 = (rs1 == '0) ? '0 : register[rs1];
-  assign rd2 = (rs2 == '0) ? '0 : register[rs2];
+    //lectura combinacional (sin reloj)
+    //para asignaciones simples no hace falta always_comb
+    //si nos piden el registro '0' damos x0 (siempre '0's)
+    assign rd1 = (rs1 == '0) ? '0 : register[rs1];
+    assign rd2 = (rs2 == '0) ? '0 : register[rs2];
 
 endmodule

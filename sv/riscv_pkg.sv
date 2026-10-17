@@ -18,7 +18,9 @@ package riscv_pkg;
     // ---- valores válidos de funct7 (7 bits completos) ----
     localparam logic [6:0] F7_BASE   = 7'b0000000;
     localparam logic [6:0] F7_ALT    = 7'b0100000;  // SUB, SRA, SRAI
+    /* verilator lint_off UNUSEDPARAM */
     localparam logic [6:0] F7_MULDIV = 7'b0000001;  // RV32M: div/divu/rem/remu (Práctica 5)
+    /* verilator lint_on UNUSEDPARAM */
 
     // ---- códigos de la ALU: { funct7 == F7_ALT, funct3 } ----
     typedef enum logic [3:0] {
