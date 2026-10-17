@@ -1,6 +1,8 @@
 // Testbench del sistema: core + memoria (doble puerto).
 // El programa termina escribiendo en el "mailbox" (dirección de byte 0x10000):
 //   0x900D -> PASS ; cualquier otro valor -> nº del test que ha fallado.
+// Se puede configurar sin recompilar:
+//   ./obj_dir/Vriscv_tb +HEX=hex/x.hex +EXPECT_ILLEGAL=3 +MAX_CYCLES=100000
 module riscv_tb #(
     parameter int    MEM_WIDTH  = 32,
     parameter int    NUM_BYTES  = 4,
@@ -54,7 +56,7 @@ module riscv_tb #(
         .MEM_WIDTH (MEM_WIDTH),
         .NUM_BYTES (NUM_BYTES),
         .ADDR_WIDTH(ADDR_WIDTH),
-        .INIT_FILE (HEX_FILE)
+        .INIT_FILE ("")
     ) RISCV_MEM (
         .clk    (clk),
         .addr_a (addr_a),
@@ -68,6 +70,43 @@ module riscv_tb #(
         .we_b   (we_b),
         .be_b   (be_b)
     );
+
+    // configuración (parámetros por defecto, sobrescribibles con +plusargs)
+    int expect_illegal;
+    int max_cycles;
+
+    initial begin
+        string hex_file;
+        hex_file       = HEX_FILE;
+        expect_illegal = EXPECT_ILLEGAL;
+        max_cycles     = MAX_CYCLES;
+        void'($value$plusargs("HEX=%s", hex_file));
+        void'($value$plusargs("EXPECT_ILLEGAL=%d", expect_illegal));
+        void'($value$plusargs("MAX_CYCLES=%d", max_cycles));
+        $readmemh(hex_file, RISCV_MEM.mem);
+        // timeout
+        repeat (max_cycles) @(posedge clk);
+        $display("*** TIMEOUT: el programa no ha terminado ***");
+        $finish;
+    end
+
+    // traza opcional (+TRACE): pc, instrucción, validez, salto y escrituras al banco
+    always @(posedge clk)
+        if ($test$plusargs("TRACE") && rst_n)
+            $display(
+                "[%0t] pc=%08h instr=%08h valid=%b jump=%b we_b=%b addr_b=%05h | x5=%08h x6=%08h x7=%08h x28=%08h",
+                $time,
+                RISCV_CORE.pc_ir,
+                rdata_a,
+                RISCV_CORE.ir_valid,
+                RISCV_CORE.jump_en,
+                we_b,
+                addr_b,
+                RISCV_CORE.decoder_inst.regfile_inst.register[5],
+                RISCV_CORE.decoder_inst.regfile_inst.register[6],
+                RISCV_CORE.decoder_inst.regfile_inst.register[7],
+                RISCV_CORE.decoder_inst.regfile_inst.register[28]
+            );
 
     // reloj: 100 MHz
     initial begin
@@ -96,23 +135,16 @@ module riscv_tb #(
     always @(posedge clk) begin
         if (we_b && addr_b == MAILBOX_ADDR) begin
             if (wdata_b != PASS_VALUE) $display("[%0t] *** FAIL: test %0d ***", $time, wdata_b);
-            else if (illegal_count != EXPECT_ILLEGAL)
+            else if (illegal_count != expect_illegal)
                 $display(
                     "[%0t] *** FAIL: %0d ilegales (esperadas %0d) ***",
                     $time,
                     illegal_count,
-                    EXPECT_ILLEGAL
+                    expect_illegal
                 );
             else $display("[%0t] *** PASS ***", $time);
             $finish;
         end
-    end
-
-    // timeout
-    initial begin
-        repeat (MAX_CYCLES) @(posedge clk);
-        $display("*** TIMEOUT: el programa no ha terminado ***");
-        $finish;
     end
 
 endmodule
