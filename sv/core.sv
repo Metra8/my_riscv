@@ -1,17 +1,18 @@
 // Core RV32I.
 //
-//  Fetch : pc -> addr_a ; la memoria registra la instrucción (IR) al final del ciclo.
-//  Exec  : decodificación + lectura de registros + ALU + acceso a memoria de datos
-//          + decisión de salto, todo en el ciclo en que la instrucción está en el IR.
-//  WB    : (solo loads) el dato llega de la memoria un ciclo después y se escribe
+//  Fetch : pc -> addr_a ; la memoria registra la instruccion (IR) al final del ciclo.
+//  Exec  : decodificacion + lectura de registros + ALU + acceso a memoria de datos
+//          + decision de salto, todo en el ciclo en que la instruccion esta en el IR.
+//  WB    : (solo loads) el dato llega de la memoria un ciclo despues y se escribe
 //          por el segundo puerto del banco de registros.
 //
 // Riesgos:
-//  - datos : ALU -> uso inmediato sin reenvío (el banco se escribe en el flanco);
-//            load -> uso inmediato con reenvío del dato de write-back (sin paradas).
-//  - control: un salto tomado anula (ir_valid = 0) la instrucción buscada tras él.
+//  - datos : ALU -> uso inmediato sin reenvio (el banco se escribe en el flanco);
+//            load -> uso inmediato con reenvio del dato de write-back (sin paradas).
+//  - control: un salto tomado anula (ir_valid = 0) la instruccion buscada tras el.
+import riscv_pkg::*;
+
 module core
-    import riscv_pkg::*;
 #(
     parameter int MEM_WIDTH  = 32,
     parameter int NUM_BYTES  = 4,
@@ -34,12 +35,12 @@ module core
     output logic                  we_b,
     output logic [NUM_BYTES-1:0]  be_b,
 
-    // instrucción ilegal (solo se señaliza, no hay excepción)
+    // instruccion ilegal (solo se senaliza, no hay excepcion)
     output logic illegal_instr
 );
 
     // ------------------------------------------------------------------
-    // señales internas
+    // senales internas
     // ------------------------------------------------------------------
     logic [MEM_WIDTH-1:0] pc_ir;
     logic                 ir_valid;
@@ -120,7 +121,7 @@ module core
         .ltu   (alu_ltu)
     );
 
-    // una instrucción anulada (ir_valid = 0) no tiene ningún efecto ni se cuenta
+    // una instruccion anulada (ir_valid = 0) no tiene ningun efecto ni se cuenta
     assign illegal_instr = dec_illegal && ir_valid;
 
     // ------------------------------------------------------------------
@@ -145,7 +146,7 @@ module core
     // ------------------------------------------------------------------
     // memoria de datos (puerto B)
     // ------------------------------------------------------------------
-    assign addr_b = alu_result[ADDR_WIDTH+1:2];  // dirección de palabra
+    assign addr_b = alu_result[ADDR_WIDTH+1:2];  // direccion de palabra
     assign we_b = ir_valid && mem_write;
 
     // store: se replica el dato en todos los carriles y se activa el byte-enable
@@ -166,7 +167,7 @@ module core
         endcase
     end
 
-    // load: la memoria registra rdata_b, así que el dato llega al ciclo siguiente
+    // load: la memoria registra rdata_b, asi que el dato llega al ciclo siguiente
     always_ff @(posedge clk) begin
         if (!rst_n) ld_valid <= 1'b0;
         else ld_valid <= ir_valid && mem_read;
@@ -195,7 +196,7 @@ module core
     assign we_a    = 1'b0;
     assign be_a    = '0;
 
-    // bits de la dirección que no llegan a la memoria (no hay más memoria)
+    // bits de la direccion que no llegan a la memoria (no hay mas memoria)
     logic unused_ok;
     assign unused_ok = &{1'b0, alu_result[MEM_WIDTH-1:ADDR_WIDTH+2]};
 

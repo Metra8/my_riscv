@@ -1,5 +1,6 @@
+import riscv_pkg::*;
+
 module alu
-    import riscv_pkg::*;
 #(
     parameter int NUM_BITS = 32
 ) (

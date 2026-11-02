@@ -1,4 +1,4 @@
-# TEST 1 - Cada instrucción con valores límite.
+# TEST 1 - Cada instruccion con valores limite.
 .include "check.inc"
 
 _boot:
@@ -25,9 +25,9 @@ _boot:
     CHECK t0, 8               # 1 << 3
     li   t1, 31
     srl  t0, a2, t1
-    CHECK t0, 1               # 0x80000000 >> 31 (lógico)
+    CHECK t0, 1               # 0x80000000 >> 31 (logico)
     sra  t0, a2, t1
-    CHECK t0, 0xFFFFFFFF      # 0x80000000 >> 31 (aritmético)
+    CHECK t0, 0xFFFFFFFF      # 0x80000000 >> 31 (aritmetico)
     slt  t0, a4, a3
     CHECK t0, 1               # -1 < 1 con signo
     sltu t0, a4, a3
@@ -49,16 +49,16 @@ _boot:
     slli t0, a3, 31
     CHECK t0, 0x80000000      # 1 << 31
     srli t0, a2, 31
-    CHECK t0, 1               # lógico
+    CHECK t0, 1               # logico
     srai t0, a2, 31
-    CHECK t0, 0xFFFFFFFF      # aritmético
+    CHECK t0, 0xFFFFFFFF      # aritmetico
 
     # ---- LUI, AUIPC, x0 ----
     lui  t0, 0x12345
     CHECK t0, 0x12345000
-au1: auipc t0, 0x12345         # pc de esta instrucción + 0x12345000
+au1: auipc t0, 0x12345         # pc de esta instruccion + 0x12345000
     lui  t2, %hi(au1)
-    addi t2, t2, %lo(au1)     # t2 = dirección de au1
+    addi t2, t2, %lo(au1)     # t2 = direccion de au1
     sub  t0, t0, t2
     CHECK t0, 0x12345000
     addi x0, x0, 5            # escribir en x0 se ignora

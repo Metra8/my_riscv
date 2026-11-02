@@ -1,5 +1,6 @@
+import riscv_pkg::*;
+
 module decoder
-    import riscv_pkg::*;
 #(
     parameter int NUM_BITS = 32
 ) (
@@ -7,14 +8,14 @@ module decoder
     input logic rst_n,
 
     input logic [NUM_BITS-1:0] instr,  // IR: rdata_a
-    input logic [NUM_BITS-1:0] pc_ir,  // PC de la instrucción del IR
+    input logic [NUM_BITS-1:0] pc_ir,  // PC de la instruccion del IR
 
-    // escritura del resultado de la ALU (instrucción del IR, ya validada por el core)
+    // escritura del resultado de la ALU (instruccion del IR, ya validada por el core)
     input logic                we_alu,
     input logic [NUM_BITS-1:0] wdata_alu,
 
-    // write-back de un load (instrucción anterior). Además de escribir en el
-    // banco, se REENVÍA a los operandos: así un load seguido de una instrucción
+    // write-back de un load (instruccion anterior). Ademas de escribir en el
+    // banco, se REENVIA a los operandos: asi un load seguido de una instruccion
     // que usa su resultado no necesita parada.
     input logic                we_mem,
     input logic [         4:0] waddr_mem,
@@ -42,7 +43,7 @@ module decoder
     output logic [NUM_BITS-1:0] jump_offset
 );
 
-    // extracción de campos fijos
+    // extraccion de campos fijos
     opcode_t opcode;
     logic [4:0] rs1_addr, rs2_addr;
     logic [6:0] funct7;
@@ -56,7 +57,7 @@ module decoder
     assign funct7   = instr[31:25];
     assign alt      = (funct7 == F7_ALT);
 
-    // generación del inmediato
+    // generacion del inmediato
     logic [NUM_BITS-1:0] imm_i, imm_s, imm_b, imm_u, imm_j, imm;
 
     assign imm_i = {{20{instr[31]}}, instr[31:20]};
@@ -96,9 +97,9 @@ module decoder
         .wdata_mem(wdata_mem)
     );
 
-    // ---- reenvío del write-back del load (riesgo de datos load-uso) ----
-    // El resultado de una ALU se escribe en el flanco y lo ve la instrucción
-    // siguiente; el de un load llega un ciclo más tarde, así que se reenvía.
+    // ---- reenvio del write-back del load (riesgo de datos load-uso) ----
+    // El resultado de una ALU se escribe en el flanco y lo ve la instruccion
+    // siguiente; el de un load llega un ciclo mas tarde, asi que se reenvia.
     logic [NUM_BITS-1:0] rs1_val;
 
     assign rs1_val = (we_mem && waddr_mem != 5'd0 && waddr_mem == rs1_addr) ? wdata_mem : rdata1;
@@ -114,7 +115,7 @@ module decoder
 
         case (opcode)
             OP_RTYPE, OP_BRANCH: op2 = rs2_val;
-            OP_JAL, OP_JALR:     op2 = NUM_BITS'(4);  // dirección de retorno = pc_ir + 4
+            OP_JAL, OP_JALR:     op2 = NUM_BITS'(4);  // direccion de retorno = pc_ir + 4
             default:             op2 = imm;
         endcase
     end
@@ -123,14 +124,14 @@ module decoder
     assign jump_base   = (opcode == OP_JALR) ? rs1_val : pc_ir;
     assign jump_offset = imm;
 
-    // código de operación de la ALU: { funct7 == 0100000, funct3 }
+    // codigo de operacion de la ALU: { funct7 == 0100000, funct3 }
     always_comb begin
         case (opcode)
             OP_RTYPE: aluop = alu_op_t'({alt, funct3});
             // en tipo I el bit "alt" solo cuenta en los shifts a la derecha
             OP_ITYPE:
             aluop = (funct3 == 3'b101) ? alu_op_t'({alt, funct3}) : alu_op_t'({1'b0, funct3});
-            OP_BRANCH: aluop = ALU_SUB;  // eq/lt/ltu salen de la comparación
+            OP_BRANCH: aluop = ALU_SUB;  // eq/lt/ltu salen de la comparacion
             default: aluop = ALU_ADD;  // load, store, jal, jalr, lui, auipc
         endcase
     end
@@ -192,7 +193,7 @@ module decoder
 
             OP_LUI, OP_AUIPC: reg_write = 1'b1;
 
-            // FENCE: legal, sin efecto en este diseño
+            // FENCE: legal, sin efecto en este diseno
             OP_FENCE: legal = (funct3 == 3'b000);
 
             // ECALL / EBREAK: legales pero sin efecto
@@ -203,7 +204,7 @@ module decoder
 
         illegal_instr = !legal;
 
-        // una instrucción ilegal no tiene efecto
+        // una instruccion ilegal no tiene efecto
         if (!legal) begin
             reg_write = 1'b0;
             mem_read  = 1'b0;

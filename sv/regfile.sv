@@ -12,11 +12,11 @@ module regfile #(
     output logic [NUM_BITS-1 : 0] rd2,
 
     //doble puerto:
-    //** debe diseñar dos interfaces de escritura independientes, uno para
-    //** escribir el resultado de la ejecución y otro para escribir el dato
+    //** debe disenar dos interfaces de escritura independientes, uno para
+    //** escribir el resultado de la ejecucion y otro para escribir el dato
     //** de instrucciones load en la etapa de write-back
 
-    //alu (ejecución)
+    //alu (ejecucion)
     input logic we_alu,
     input logic [4:0] waddr_alu,
     input logic [NUM_BITS-1:0] wdata_alu,
@@ -31,15 +31,15 @@ module regfile #(
     //registro de [32][32]
     logic [NUM_BITS-1 : 0] register[NUM_REGS-1 : 0];
 
-    //escritura síncrona (memoria persistente)-
+    //escritura sincrona (memoria persistente)-
     always_ff @(posedge clk) begin
         if (!rst_n) begin
-            //técnicamente aquí no hace falta begin/end
+            //tecnicamente aqui no hace falta begin/end
             for (int i = 0; i < NUM_REGS; i++) begin
                 register[i] <= '0;
             end
         end else begin
-            // Solo se permite la escritura si la dirección NO es el registro 0
+            // Solo se permite la escritura si la direccion NO es el registro 0
             if (we_mem && (waddr_mem != '0)) register[waddr_mem] <= wdata_mem;
             if (we_alu && (waddr_alu != '0)) register[waddr_alu] <= wdata_alu;
         end
