@@ -87,7 +87,7 @@ module riscv_tb #(
         // timeout
         repeat (max_cycles) @(posedge clk);
         $display("*** TIMEOUT: el programa no ha terminado ***");
-        $finish;
+        $stop;
     end
 
     // traza opcional (+TRACE): pc, instrucción, validez, salto y escrituras al banco
