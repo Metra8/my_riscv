@@ -1,5 +1,5 @@
 // Testbench del sistema: core + memoria (doble puerto).
-// El programa termina escribiendo en el "mailbox" (dirección de byte 0x10000):
+// El programa termina escribiendo en el "mailbox" (direccion de byte 0x10000):
 //   0x900D -> PASS ; cualquier otro valor -> nº del test que ha fallado.
 // Se puede configurar sin recompilar:
 //   ./obj_dir/Vriscv_tb +HEX=hex/x.hex +EXPECT_ILLEGAL=3 +MAX_CYCLES=100000
@@ -9,7 +9,7 @@ module riscv_tb #(
     parameter int    ADDR_WIDTH = 17,
     parameter string HEX_FILE   = "hex/program.hex",
     parameter int    MAX_CYCLES = 20000,
-    // nº de instrucciones ilegales (válidas) que debe señalizar el programa
+    // nº de instrucciones ilegales (validas) que debe senalizar el programa
     parameter int    EXPECT_ILLEGAL = 0
 ) ();
 
@@ -71,7 +71,7 @@ module riscv_tb #(
         .be_b   (be_b)
     );
 
-    // configuración (parámetros por defecto, sobrescribibles con +plusargs)
+    // configuracion (parametros por defecto, sobrescribibles con +plusargs)
     int expect_illegal;
     int max_cycles;
 
@@ -90,7 +90,7 @@ module riscv_tb #(
         $stop;
     end
 
-    // traza opcional (+TRACE): pc, instrucción, validez, salto y escrituras al banco
+    // traza opcional (+TRACE): pc, instruccion, validez, salto y escrituras al banco
     always @(posedge clk)
         if ($test$plusargs("TRACE") && rst_n)
             $display(
@@ -121,7 +121,7 @@ module riscv_tb #(
         #1 rst_n = 1'b1;
     end
 
-    // instrucción ilegal: se cuenta (solo se señaliza, no hay excepción)
+    // instruccion ilegal: se cuenta (solo se senaliza, no hay excepcion)
     int illegal_count;
     always @(posedge clk)
         if (!rst_n) illegal_count <= 0;
@@ -131,7 +131,7 @@ module riscv_tb #(
                      RISCV_CORE.fetch_inst.pc_ir);
         end
 
-    // fin de programa: mailbox + comprobación del nº de ilegales
+    // fin de programa: mailbox + comprobacion del nº de ilegales
     always @(posedge clk) begin
         if (we_b && addr_b == MAILBOX_ADDR) begin
             if (wdata_b != PASS_VALUE) $display("[%0t] *** FAIL: test %0d ***", $time, wdata_b);

@@ -8,8 +8,8 @@
 # Reservados (no usar en los tests): a0, s11, t5, t6
 #
 # CHECK compara el registro con el valor esperado. Si no coincide, el test falla
-# y escribe en el mailbox el nº de la comprobación. Además acumula la diferencia
-# en a0, de modo que aunque un salto estuviese roto el error llegaría al final.
+# y escribe en el mailbox el nº de la comprobacion. Ademas acumula la diferencia
+# en a0, de modo que aunque un salto estuviese roto el error llegaria al final.
 # END escribe 0x900D (PASS) en el mailbox si todo fue correcto.
 # ---------------------------------------------------------------------------
 .global _boot
@@ -17,7 +17,7 @@
 
 .macro INIT
     li   a0, 0              # acumulador de errores
-    li   s11, 0             # nº de comprobación
+    li   s11, 0             # nº de comprobacion
 .endm
 
 .macro CHECK reg, expected
@@ -38,6 +38,6 @@
 1:  j    1b
 fail:
     li   t5, 0x10000
-    sw   s11, 0(t5)         # nº de la comprobación que falló
+    sw   s11, 0(t5)         # nº de la comprobacion que fallo
 2:  j    2b
 .endm

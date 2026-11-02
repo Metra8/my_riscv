@@ -37,7 +37,7 @@ _boot:
     BTEST bgeu, a3, a1, TOMADO       # 0xFFFFFFFF >= 0 sin signo
     BTEST bgeu, a4, a5, NO_TOMADO    # 0x7FFFFFFF >= 0x80000000 sin signo
 
-    # ---- salto hacia atrás: bucle 10+9+...+1 ----
+    # ---- salto hacia atras: bucle 10+9+...+1 ----
     li   t3, 10
     li   t0, 0
 1:  add  t0, t0, t3
@@ -45,17 +45,17 @@ _boot:
     bne  t3, x0, 1b
     CHECK t0, 55
 
-    # ---- jal: guarda la dirección de retorno y anula la instrucción siguiente ----
+    # ---- jal: guarda la direccion de retorno y anula la instruccion siguiente ----
     li   t0, 0
     jal  t4, 1f
 0:  addi t0, t0, 1               # anulada
     addi t0, t0, 2               # anulada
 1:  addi t0, t0, 16
     lui  t3, %hi(0b)
-    addi t3, t3, %lo(0b)         # t3 = dirección de la instrucción tras el jal
+    addi t3, t3, %lo(0b)         # t3 = direccion de la instruccion tras el jal
     sub  t4, t4, t3
     CHECK t0, 16
-    CHECK t4, 0                  # el enlace guardado era esa dirección
+    CHECK t4, 0                  # el enlace guardado era esa direccion
 
     # ---- jalr ----
     li   t0, 0
@@ -80,7 +80,7 @@ f1: addi t0, t0, 10
 9:
     CHECK t0, 1010
 
-    # ---- load seguido INMEDIATAMENTE de una instrucción que usa su resultado ----
+    # ---- load seguido INMEDIATAMENTE de una instruccion que usa su resultado ----
     la   s1, datos               # 0x80FF7F01, 0x12345678, 7
     lw   t0, 0(s1)
     addi t0, t0, 1
@@ -97,8 +97,8 @@ f1: addi t0, t0, 10
     lw   t0, 12(s1)
     CHECK t0, 0x80FF7F01
     la   t2, ptr
-    lw   t3, 0(t2)               # t3 = dirección de cadena
-    lw   t0, 0(t3)               # como dirección de otro load
+    lw   t3, 0(t2)               # t3 = direccion de cadena
+    lw   t0, 0(t3)               # como direccion de otro load
     CHECK t0, 0xC0DE1234
     li   t1, 0x12345678
     lw   t0, 4(s1)
@@ -106,10 +106,10 @@ f1: addi t0, t0, 10
     li   t0, 99
 1:  CHECK t0, 0x12345678
     lw   t0, 0(s1)
-    li   t0, 7                   # escribe el mismo registro: gana la última
+    li   t0, 7                   # escribe el mismo registro: gana la ultima
     CHECK t0, 7
     lb   t0, 3(s1)
-    addi t0, t0, 0               # con extensión de signo
+    addi t0, t0, 0               # con extension de signo
     CHECK t0, 0xFFFFFF80
 
     # ---- lo que sigue a un salto tomado NO debe tener efecto ----
@@ -125,7 +125,7 @@ f1: addi t0, t0, 10
     sw   t2, 16(s1)              # store anulado: la memoria no cambia
 1:  lw   t0, 16(s1)
     CHECK t0, 0x1111
-    lw   t3, 4(s1)               # un load justo ANTES del salto SÍ se completa
+    lw   t3, 4(s1)               # un load justo ANTES del salto SI se completa
     beq  x0, x0, 1f
     addi t2, t3, 0               # anulada
 1:  addi t0, t3, 0
@@ -137,7 +137,7 @@ f1: addi t0, t0, 10
     beq  x0, x0, 3f              # en la sombra: NO debe saltar
 1:  addi t0, t0, 8
     j    4f
-3:  addi t0, t0, 100             # solo se llega aquí si algo falló
+3:  addi t0, t0, 100             # solo se llega aqui si algo fallo
 4:  CHECK t0, 8
     li   t0, 0
     jal  x0, 1f

@@ -1,4 +1,4 @@
-# Programa de ejemplo (práctica 1): cadena de addi dependientes + carga de una
+# Programa de ejemplo (practica 1): cadena de addi dependientes + carga de una
 # variable de .data. Termina escribiendo 0x900D (PASS) o 1 (FAIL) en el mailbox.
 .global _boot
 .text

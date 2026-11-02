@@ -22,9 +22,9 @@ module memory #(
     input  logic [NUM_BYTES-1 : 0]  be_b
 );
 
-    // memoria en sí, tamaño de 2^addr_width -1, cada elemento de tamaño
-    // mem width-1; se escribe así porque el tamaño es unpacked pero el
-    // tamaño de cada elemento es packed
+    // memoria en si, tamano de 2^addr_width -1, cada elemento de tamano
+    // mem width-1; se escribe asi porque el tamano es unpacked pero el
+    // tamano de cada elemento es packed
     logic [MEM_WIDTH-1 : 0] mem[0 : (2**(ADDR_WIDTH) -1)];
     // [MEM_WIDTH-1 : 0] es packed, [0 : (2**(ADDR_WIDTH) -1)] es unpacked
 
@@ -37,7 +37,7 @@ module memory #(
 
 
     // cosas que tiene que tener:
-    // El tamaño total de la memoria es 2** ADDR_WIDTH x MEM_WIDTH
+    // El tamano total de la memoria es 2** ADDR_WIDTH x MEM_WIDTH
     // los dos puertos disponen de we
     // permite lectura y escritura (rdata y wdata)
 
@@ -51,7 +51,7 @@ module memory #(
                     mem[addr_a][i*8+:8] <= wdata_a[i*8+:8];
                     // +: es el operador de part-select indexado, de forma que:
                     // vector[base + ancho -1 : base] = vector[base +: ancho]
-                    // de normal sería:
+                    // de normal seria:
                     // mem[addr_a][i*8 + 8 - 1 : i*8]; con i=0, i=1:
                     // mem[addr_a][7:0]; mem[addr_a][15:8];
                 end
