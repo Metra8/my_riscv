@@ -6,7 +6,7 @@
 */
 module parallel_nrd #(
     parameter int NUMBITS = 32
-) (
+)(
     input  logic               Clk,        // sin usar
     input  logic [NUMBITS-1:0] Dividendo,
     input  logic [NUMBITS-1:0] Divisor,
@@ -17,7 +17,7 @@ module parallel_nrd #(
     output logic               Done
 );
 
-    logic [NUMBITS:0] R, B;
+    logic [NUMBITS:0]   R, B;
     logic [NUMBITS-1:0] C;
     logic               neg;
 
@@ -29,12 +29,12 @@ module parallel_nrd #(
 
         // Pasos 2-4: n iteraciones (el for se desenrolla en n copias de hardware)
         for (int i = 0; i < NUMBITS; i++) begin
-            neg = R[NUMBITS];  // signo de R antes de desplazar
-            R   = {R[NUMBITS-1:0], C[NUMBITS-1]};  // desplazar (R,C) a la izquierda
+            neg = R[NUMBITS];                     // signo de R antes de desplazar
+            R   = {R[NUMBITS-1:0], C[NUMBITS-1]}; // desplazar (R,C) a la izquierda
             C   = {C[NUMBITS-2:0], 1'b0};
-            if (neg) R = R + B;  // R negativo -> sumar B
-            else R = R - B;  // R positivo -> restar B
-            C[0] = ~R[NUMBITS];  // bit cociente: 1 si R>=0, 0 si R<0
+            if (neg) R = R + B;                   // R negativo -> sumar B
+            else     R = R - B;                   // R positivo -> restar B
+            C[0] = ~R[NUMBITS];                   // bit cociente: 1 si R>=0, 0 si R<0
         end
 
         // Paso 5: correccion del resto
