@@ -51,8 +51,8 @@ module core
     alu_op_t aluop;
     logic reg_write, mem_read, mem_write, is_branch, is_jump;
     logic                 dec_illegal;
-    logic [          2:0] funct3;
-    logic [          4:0] rd;
+    logic [2:0] funct3;
+    logic [4:0] rd;
 
     logic [MEM_WIDTH-1:0] alu_result;
     logic alu_eq, alu_lt, alu_ltu;
