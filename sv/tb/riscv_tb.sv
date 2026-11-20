@@ -76,6 +76,13 @@ module riscv_tb #(
     int max_cycles;
 
     initial begin
+        if ($test$plusargs("DUMP")) begin
+            $dumpfile("ondas.vcd");
+            $dumpvars(0, riscv_tb);
+        end
+    end
+
+    initial begin
         string hex_file;
         hex_file       = HEX_FILE;
         expect_illegal = EXPECT_ILLEGAL;
@@ -91,8 +98,16 @@ module riscv_tb #(
     end
 
     // traza opcional (+TRACE): pc, instruccion, validez, salto y escrituras al banco
+    // ventana opcional de traza: +TRACE_FROM=<ps> +TRACE_TO=<ps>
+    longint trace_from = 0;
+    longint trace_to   = 64'h7FFF_FFFF_FFFF_FFFF;
+    initial begin
+        void'($value$plusargs("TRACE_FROM=%d", trace_from));
+        void'($value$plusargs("TRACE_TO=%d", trace_to));
+    end
+
     always @(posedge clk)
-        if ($test$plusargs("TRACE") && rst_n)
+        if ($test$plusargs("TRACE") && rst_n && $time >= trace_from && $time <= trace_to)
             $display(
                 "[%0t] pc=%08h instr=%08h valid=%b jump=%b we_b=%b addr_b=%05h | x5=%08h x6=%08h x7=%08h x28=%08h",
                 $time,
@@ -143,8 +158,38 @@ module riscv_tb #(
                     expect_illegal
                 );
             else $display("[%0t] *** PASS ***", $time);
-            $stop;
+            $finish;
         end
     end
+
+    // ------------------------------------------------------------------
+    // comprobaciones automaticas (solo avisan cuando algo va mal)
+    // ------------------------------------------------------------------
+    logic [MEM_WIDTH-1:0] alu_addr;
+    assign alu_addr = RISCV_CORE.alu_result;
+
+    // acceso a datos con bits altos fuera de la memoria: la direccion se
+    // trunca y hace aliasing sobre el principio de la memoria (codigo)
+    always @(posedge clk)
+        if (rst_n && RISCV_CORE.ir_valid &&
+            (RISCV_CORE.mem_read || RISCV_CORE.mem_write) &&
+            (alu_addr[MEM_WIDTH-1:ADDR_WIDTH+2] != 0))
+            $display("[%0t] AVISO: acceso fuera de rango pc=%08h addr=%08h (%s) -> aliasing a palabra %05h",
+                     $time, RISCV_CORE.pc_ir, alu_addr,
+                     RISCV_CORE.mem_write ? "store" : "load", addr_b);
+
+    // fin de programa por bucle infinito (jal x0,0 / beq x0,x0,0...): el
+    // salto cae en su propia direccion
+    logic [MEM_WIDTH-1:0] self_target;
+    assign self_target = (RISCV_CORE.jump_base + RISCV_CORE.jump_offset) & ~32'h1;
+
+    always @(posedge clk)
+        if (rst_n && RISCV_CORE.jump_en && self_target == RISCV_CORE.pc_ir) begin
+            $display("[%0t] FIN: bucle infinito en pc=0x%08h (sin escribir en el mailbox)",
+                     $time, RISCV_CORE.pc_ir);
+            $display("      x28=%08h  ilegales=%0d",
+                     RISCV_CORE.decoder_inst.regfile_inst.register[28], illegal_count);
+            $finish;
+        end
 
 endmodule

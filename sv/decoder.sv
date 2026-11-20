@@ -1,6 +1,5 @@
-import riscv_pkg::*;
-
 module decoder
+    import riscv_pkg::*;
 #(
     parameter int NUM_BITS = 32
 ) (

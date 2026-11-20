@@ -10,9 +10,8 @@
 //  - datos : ALU -> uso inmediato sin reenvio (el banco se escribe en el flanco);
 //            load -> uso inmediato con reenvio del dato de write-back (sin paradas).
 //  - control: un salto tomado anula (ir_valid = 0) la instruccion buscada tras el.
-import riscv_pkg::*;
-
 module core
+    import riscv_pkg::*;
 #(
     parameter int MEM_WIDTH  = 32,
     parameter int NUM_BYTES  = 4,
